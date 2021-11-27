@@ -142,6 +142,11 @@ python -m scripts.benchmark_3dmatch.py \
     --extract_features --evaluate_feature_match_recall --with_cuda
 ```
 
+## Training on YCB Video
+
+```
+python train.py --dataset YCBVideoPairDataset --ycb_video_dir /path/to/ycbvideo/
+```
 
 ## Training and testing on KITTI Odometry custom split
 

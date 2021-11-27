@@ -111,6 +111,8 @@ data_arg.add_argument('--voxel_size', type=float, default=0.025)
 data_arg.add_argument(
     '--threed_match_dir', type=str, default="/home/chrischoy/datasets/FCGF/threedmatch")
 data_arg.add_argument(
+    '--ycb_video_dir', type=str, default=".")
+data_arg.add_argument(
     '--kitti_root', type=str, default="/home/chrischoy/datasets/FCGF/kitti/")
 data_arg.add_argument(
     '--kitti_max_time_diff',

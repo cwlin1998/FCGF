@@ -241,8 +241,8 @@ class IndoorPairDataset(PairDataset):
       trans = np.identity(4)
 
     # Voxelization
-    _, sel0 = ME.utils.sparse_quantize(xyz0 / self.voxel_size, return_index=True)
-    _, sel1 = ME.utils.sparse_quantize(xyz1 / self.voxel_size, return_index=True)
+    coords0, sel0 = ME.utils.sparse_quantize(xyz0 / self.voxel_size, return_index=True)
+    coords1, sel1 = ME.utils.sparse_quantize(xyz1 / self.voxel_size, return_index=True)
 
     # Make point clouds using voxelized points
     pcd0 = make_open3d_point_cloud(xyz0)
@@ -271,9 +271,6 @@ class IndoorPairDataset(PairDataset):
     # Get coords
     xyz0 = np.array(pcd0.points)
     xyz1 = np.array(pcd1.points)
-
-    coords0 = np.floor(xyz0 / self.voxel_size)
-    coords1 = np.floor(xyz1 / self.voxel_size)
 
     if self.transform:
       coords0, feats0 = self.transform(coords0, feats0)
@@ -632,8 +629,40 @@ class ThreeDMatchPairDataset(IndoorPairDataset):
       'test': './config/test_3dmatch.txt'
   }
 
+class YCBVideoPairDataset(IndoorPairDataset):
+  DATA_FILES = {
+      'train': './config/train_ycb_video.txt',
+      'val': './config/val_ycb_video.txt'
+  }
+  def __init__(self,
+               phase,
+               transform=None,
+               random_rotation=True,
+               random_scale=True,
+               manual_seed=False,
+               config=None):
 
-ALL_DATASETS = [ThreeDMatchPairDataset, KITTIPairDataset, KITTINMPairDataset]
+    PairDataset.__init__(self, phase, transform, random_rotation, random_scale,
+                         manual_seed, config)
+
+    self.root = root = config.ycb_video_dir
+    logging.info(f"Loading the subset {phase} from {root}")
+
+    subset_names = open(self.DATA_FILES[phase]).read().split()
+    for name in subset_names:
+      fname = name + "_scene2scene*.txt"
+      fnames_txt = glob.glob(root + "/" + fname)
+      assert len(fnames_txt) > 0, f"Make sure that the path {root} has data {fname}"
+      for fname_txt in fnames_txt:
+        with open(fname_txt) as f:
+          content = f.readlines()
+
+        fnames = [x.strip().split() for x in content]
+        for fname in fnames:
+          self.files.append([fname[0], fname[1]])
+
+
+ALL_DATASETS = [ThreeDMatchPairDataset, KITTIPairDataset, KITTINMPairDataset, YCBVideoPairDataset]
 dataset_str_mapping = {d.__name__: d for d in ALL_DATASETS}
 
 
